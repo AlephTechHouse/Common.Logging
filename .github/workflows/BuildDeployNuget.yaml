@@ -1,0 +1,58 @@
+name: Common.Logging - Build and Deploy Nuget
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/infrastructure/Common.Logging/**'
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_PATH: 'server/infrastructure/Common.Logging/src/Common.Logging'
+      PROJECT_PATH_TESTS: 'server/infrastructure/Common.Logging/src/Common.Logging.Tests'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}/Common.Logging.csproj
+
+      - name: Build
+        run: >
+          dotnet build ${{ env.PROJECT_PATH }}/Common.Logging.csproj
+          --configuration Release
+          --no-restore
+
+      - name: Restore Test dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH_TESTS }}/Common.Logging.Tests.csproj
+
+      - name: Test
+        run: dotnet test ${{ env.PROJECT_PATH_TESTS }}/Common.Logging.Tests.csproj
+
+      - name: Pack
+        run: >
+          dotnet pack ${{ env.PROJECT_PATH }}/Common.Logging.csproj
+          --configuration Release
+          --no-build
+          --include-symbols
+          --output out
+          --include-source
+
+      - name: Publish Nuget to GitHub Packages
+        run: >
+          dotnet nuget push "out/*.nupkg"
+          --api-key ${{ secrets.NUGET_PAT}}
+          --source https://nuget.pkg.github.com/AlephTechHouse/index.json

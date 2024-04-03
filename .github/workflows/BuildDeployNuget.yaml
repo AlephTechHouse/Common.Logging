@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'server/infrastructure/Common.Logging/**'
   workflow_dispatch:
 
 jobs:
@@ -13,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_PATH: 'server/infrastructure/Common.Logging/src/Common.Logging'
-      PROJECT_PATH_TESTS: 'server/infrastructure/Common.Logging/src/Common.Logging.Tests'
+      PROJECT_PATH: 'Common.Logging/src/Common.Logging'
+      PROJECT_PATH_TESTS: 'Common.Logging/src/Common.Logging.Tests'
 
     steps:
       - name: Checkout

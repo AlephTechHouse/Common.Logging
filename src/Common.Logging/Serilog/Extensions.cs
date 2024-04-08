@@ -53,7 +53,11 @@ public static class Extensions
             }
         });
 
-        Log.Logger = new LoggerConfiguration().CreateLogger();
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console(
+                theme: AnsiConsoleTheme.Code,
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+            .CreateLogger();
 
         if (!isSeqUrlConfigured)
         {

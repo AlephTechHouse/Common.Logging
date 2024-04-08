@@ -53,26 +53,24 @@ public static class Extensions
             }
         });
 
-        var configLogger = new LoggerConfiguration()
-            .WriteTo.Console(
-                theme: AnsiConsoleTheme.Code,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+        var tempLogger = new LoggerConfiguration()
+            .WriteTo.Console()
             .CreateLogger();
 
         if (!isSeqUrlConfigured)
         {
-            configLogger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
+            tempLogger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
         }
 
         if (!isElasticsearchUrlConfigured)
         {
-            configLogger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
+            tempLogger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
 
         }
 
         if (!isServiceNameConfigured)
         {
-            configLogger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
+            tempLogger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
         }
 
         return hostBuilder;

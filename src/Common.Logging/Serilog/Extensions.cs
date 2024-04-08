@@ -53,6 +53,8 @@ public static class Extensions
             }
         });
 
+        Log.Logger = new LoggerConfiguration().CreateLogger();
+
         if (!isSeqUrlConfigured)
         {
             Log.Logger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");

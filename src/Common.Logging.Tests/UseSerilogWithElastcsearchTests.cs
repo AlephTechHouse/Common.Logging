@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Events;
 using Serilog.Sinks.InMemory;
 
 namespace Common.Logging.Test;
@@ -47,9 +46,9 @@ public class UseSerilogWithElastcsearchTests
         // Arrange
         var inMemorySettings = new Dictionary<string, string>
         {
-            {"ElasticsearchUrl", ""},
-            {"SeqUrl", ""},
-            {"ApplicationName", ""}
+            {"ElasticsearchUrl", "localhost:9200"},
+            {"SeqUrl", ""}, // misconfigured
+            {"ServiceSettings:ServiceName", "MyService"}
         };
 
         var configuration = new ConfigurationBuilder()
@@ -58,15 +57,19 @@ public class UseSerilogWithElastcsearchTests
 
         var hostBuilder = new HostBuilder();
 
-        var stringWriter = new StringWriter();
-        Console.SetOut(stringWriter);
+        var sink = new InMemorySink();
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Sink(sink)
+            .CreateLogger();
 
         // Act
         hostBuilder.UseSerilogWithElasticsearch(configuration);
 
         // Assert
-        var logMessage = stringWriter.ToString();
-        Assert.Contains("ElasticSearchUrl or SeqUrl or applicationName is not configured in appsettings.json", logMessage);
+        var logEvent = sink.LogEvents.FirstOrDefault();
+
+        Assert.NotNull(logEvent);
+        Assert.Contains("SeqUrl is not configured in appsettings.json", logEvent.RenderMessage());
 
     }
 }

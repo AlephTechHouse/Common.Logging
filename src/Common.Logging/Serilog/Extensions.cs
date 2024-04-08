@@ -14,21 +14,13 @@ public static class Extensions
         this IHostBuilder hostBuilder,
         IConfiguration configuration)
     {
+
+
         var elasticserchUrl = configuration["ElasticSearchUrl"];
         var seqUrl = configuration["SeqUrl"];
-        var applicationName = configuration["ApplicationName"];
+        var serviceName = configuration["ServiceSettings:ServiceName"];
 
-        if (string.IsNullOrWhiteSpace(elasticserchUrl) || string.IsNullOrWhiteSpace(seqUrl) || string.IsNullOrWhiteSpace(applicationName))
-        {
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console()
-                .CreateLogger();
-
-            Log.Logger.Error("ElasticSearchUrl or SeqUrl or applicationName is not configured in appsettings.json");
-            return hostBuilder;
-        }
-
-        Log.Logger = new LoggerConfiguration()
+        var loggerConfiguration = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
             .Enrich.FromLogContext()
             .Enrich.WithMachineName()
@@ -38,21 +30,38 @@ public static class Extensions
             .Enrich.WithEnvironmentName()
             .WriteTo.Console(
                 theme: AnsiConsoleTheme.Code,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}"
-            )
-            .WriteTo.Debug(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
-            .WriteTo.Seq(seqUrl)
-            .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticserchUrl))
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+            .WriteTo.Debug(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
+
+        if (!string.IsNullOrWhiteSpace(seqUrl))
+        {
+            loggerConfiguration.WriteTo.Seq(seqUrl);
+        }
+        else
+        {
+            Log.Logger.Error("SeqUrl is not configured in appsettings.json");
+        }
+
+        if (string.IsNullOrWhiteSpace(elasticserchUrl))
+        {
+            Log.Logger.Error("ElasticSearchUrl is not configured in appsettings.json");
+        }
+        else if (string.IsNullOrWhiteSpace(serviceName))
+        {
+            Log.Logger.Error("ServiceSettings:ServiceName is not configured in appsettings.json");
+        }
+        else
+        {
+            loggerConfiguration.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticserchUrl))
             {
                 AutoRegisterTemplate = true,
                 AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
-                IndexFormat = $"{applicationName.ToLower()}-{DateTime.UtcNow:yyyy.MM}",
+                IndexFormat = $"{serviceName.ToLower()}-{DateTime.UtcNow:yyyy.MM}",
                 CustomFormatter = new ElasticsearchJsonFormatter(renderMessage: true, inlineFields: true)
-            })
-            .CreateLogger();
+            });
+        }
 
-        hostBuilder.UseSerilog();
-
+        Log.Logger = loggerConfiguration.CreateLogger();
         return hostBuilder;
     }
 }

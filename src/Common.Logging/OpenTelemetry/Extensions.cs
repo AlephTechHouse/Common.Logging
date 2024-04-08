@@ -19,10 +19,15 @@ public static class Extensions
         var jaegerUrl = configuration["JaegerUrl"];
         var jaegerPort = configuration["JaegerPort"];
 
-        if (string.IsNullOrWhiteSpace(jaegerUrl) || string.IsNullOrWhiteSpace(jaegerPort))
+        if (string.IsNullOrWhiteSpace(jaegerUrl))
         {
-            configErrorLogger.Error("JaegerUrl or JaegerPort is not configured in appsettings.json");
-            throw new ArgumentNullException("JaegerUrl or JaegerPort is not configured in appsettings.json");
+            configErrorLogger.Error("JaegerUrl is not configured in appsettings.json");
+            throw new ArgumentNullException("JaegerUrl is not configured in appsettings.json");
+        }
+        else if (string.IsNullOrWhiteSpace(jaegerPort))
+        {
+            configErrorLogger.Error("JaegerPort is not configured in appsettings.json");
+            throw new ArgumentNullException("JaegerPort is not configured in appsettings.json");
         }
 
         try

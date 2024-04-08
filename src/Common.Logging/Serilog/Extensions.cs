@@ -26,47 +26,49 @@ public static class Extensions
         bool isElasticsearchUrlConfigured = !string.IsNullOrWhiteSpace(elasticserchUrl);
         bool isServiceNameConfigured = !string.IsNullOrWhiteSpace(serviceName);
 
-        var loggerConfiguration = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .Enrich.FromLogContext()
-            .Enrich.WithMachineName()
-            .Enrich.WithProcessId()
-            .Enrich.WithThreadId()
-            .Enrich.WithExceptionDetails()
-            .Enrich.WithEnvironmentName()
-            .WriteTo.Console(
-                theme: AnsiConsoleTheme.Code,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
-            .WriteTo.Debug(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
-
-        if (isSeqUrlConfigured)
+        hostBuilder.UseSerilog((hostingContext, loggerConfiguration) =>
         {
-            loggerConfiguration.WriteTo.Seq(seqUrl!);
-        }
+            loggerConfiguration
+                .ReadFrom.Configuration(configuration)
+                .Enrich.FromLogContext()
+                .Enrich.WithMachineName()
+                .Enrich.WithProcessId()
+                .Enrich.WithThreadId()
+                .Enrich.WithExceptionDetails()
+                .Enrich.WithEnvironmentName()
+                .WriteTo.Console(
+                    theme: AnsiConsoleTheme.Code,
+                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+                .WriteTo.Debug(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
 
-        if (isElasticsearchUrlConfigured && isServiceNameConfigured)
+            if (isSeqUrlConfigured)
+            {
+                loggerConfiguration.WriteTo.Seq(seqUrl!);
+            }
 
-        {
-            loggerConfiguration.WriteTo.Elasticsearch(CreateElasticsearchSinkOptions(elasticserchUrl!, serviceName!));
-        }
+            if (isElasticsearchUrlConfigured && isServiceNameConfigured)
 
-        Log.Logger = loggerConfiguration.CreateLogger();
+            {
+                loggerConfiguration.WriteTo.Elasticsearch(CreateElasticsearchSinkOptions(elasticserchUrl!, serviceName!));
+            }
 
-        if (!isSeqUrlConfigured)
-        {
-            Log.Logger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
-        }
+            if (!isSeqUrlConfigured)
+            {
+                Log.Logger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
+            }
 
-        if (!isElasticsearchUrlConfigured)
-        {
-            Log.Logger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
+            if (!isElasticsearchUrlConfigured)
+            {
+                Log.Logger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
 
-        }
+            }
 
-        if (!isServiceNameConfigured)
-        {
-            Log.Logger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
-        }
+            if (!isServiceNameConfigured)
+            {
+                Log.Logger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
+            }
+        });
+
         return hostBuilder;
     }
     private static ElasticsearchSinkOptions CreateElasticsearchSinkOptions(string elasticserchUrl, string serviceName)

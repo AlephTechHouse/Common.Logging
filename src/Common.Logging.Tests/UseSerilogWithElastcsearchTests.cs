@@ -18,7 +18,7 @@ public class UseSerilogWithElastcsearchTests
     {
         {"ElasticsearchUrl", "http://localhost:9200"},
         {"SeqUrl", "http://localhost:5341"},
-        {"ApplicationName", "YourApplicationName"}
+        {"ServiceSettings:ServiceName", "YourServiceName"}
     };
 
         var configuration = new ConfigurationBuilder()

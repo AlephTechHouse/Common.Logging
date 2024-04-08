@@ -53,7 +53,7 @@ public static class Extensions
             }
         });
 
-        Log.Logger = new LoggerConfiguration()
+        var configLogger = new LoggerConfiguration()
             .WriteTo.Console(
                 theme: AnsiConsoleTheme.Code,
                 outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
@@ -61,18 +61,18 @@ public static class Extensions
 
         if (!isSeqUrlConfigured)
         {
-            Log.Logger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
+            configLogger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
         }
 
         if (!isElasticsearchUrlConfigured)
         {
-            Log.Logger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
+            configLogger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
 
         }
 
         if (!isServiceNameConfigured)
         {
-            Log.Logger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
+            configLogger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
         }
 
         return hostBuilder;

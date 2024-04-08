@@ -51,23 +51,23 @@ public static class Extensions
             {
                 loggerConfiguration.WriteTo.Elasticsearch(CreateElasticsearchSinkOptions(elasticserchUrl!, serviceName!));
             }
-
-            if (!isSeqUrlConfigured)
-            {
-                Log.Logger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
-            }
-
-            if (!isElasticsearchUrlConfigured)
-            {
-                Log.Logger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
-
-            }
-
-            if (!isServiceNameConfigured)
-            {
-                Log.Logger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
-            }
         });
+
+        if (!isSeqUrlConfigured)
+        {
+            Log.Logger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
+        }
+
+        if (!isElasticsearchUrlConfigured)
+        {
+            Log.Logger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
+
+        }
+
+        if (!isServiceNameConfigured)
+        {
+            Log.Logger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
+        }
 
         return hostBuilder;
     }

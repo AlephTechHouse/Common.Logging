@@ -10,15 +10,21 @@ namespace Common.Logging.Serilog;
 
 public static class Extensions
 {
+    private const string ElasticSearchUrlKey = "ElasticSearchUrl";
+    private const string SeqUrlKey = "SeqUrl";
+    private const string ServiceNameKey = "ServiceSettings:ServiceName";
+
     public static IHostBuilder UseSerilogWithElasticsearch(
         this IHostBuilder hostBuilder,
         IConfiguration configuration)
     {
+        var elasticserchUrl = configuration[ElasticSearchUrlKey];
+        var seqUrl = configuration[SeqUrlKey];
+        var serviceName = configuration[ServiceNameKey];
 
-
-        var elasticserchUrl = configuration["ElasticSearchUrl"];
-        var seqUrl = configuration["SeqUrl"];
-        var serviceName = configuration["ServiceSettings:ServiceName"];
+        bool isSeqUrlConfigured = !string.IsNullOrWhiteSpace(seqUrl);
+        bool isElasticsearchUrlConfigured = !string.IsNullOrWhiteSpace(elasticserchUrl);
+        bool isServiceNameConfigured = !string.IsNullOrWhiteSpace(serviceName);
 
         var loggerConfiguration = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
@@ -33,36 +39,46 @@ public static class Extensions
                 outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
             .WriteTo.Debug(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
 
-        if (!string.IsNullOrWhiteSpace(seqUrl))
+        if (isSeqUrlConfigured)
         {
-            loggerConfiguration.WriteTo.Seq(seqUrl);
-        }
-        else
-        {
-            Log.Logger.Error("SeqUrl is not configured in appsettings.json");
+            loggerConfiguration.WriteTo.Seq(seqUrl!);
         }
 
-        if (string.IsNullOrWhiteSpace(elasticserchUrl))
+        if (isElasticsearchUrlConfigured && isServiceNameConfigured)
+
         {
-            Log.Logger.Error("ElasticSearchUrl is not configured in appsettings.json");
-        }
-        else if (string.IsNullOrWhiteSpace(serviceName))
-        {
-            Log.Logger.Error("ServiceSettings:ServiceName is not configured in appsettings.json");
-        }
-        else
-        {
-            loggerConfiguration.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticserchUrl))
-            {
-                AutoRegisterTemplate = true,
-                AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
-                IndexFormat = $"{serviceName.ToLower()}-{DateTime.UtcNow:yyyy.MM}",
-                CustomFormatter = new ElasticsearchJsonFormatter(renderMessage: true, inlineFields: true)
-            });
+            loggerConfiguration.WriteTo.Elasticsearch(CreateElasticsearchSinkOptions(elasticserchUrl!, serviceName!));
         }
 
         Log.Logger = loggerConfiguration.CreateLogger();
+
+        if (!isSeqUrlConfigured)
+        {
+            Log.Logger.Error($"{nameof(SeqUrlKey)} is not configured in appsettings.json");
+        }
+
+        if (!isElasticsearchUrlConfigured)
+        {
+            Log.Logger.Error($"{nameof(ElasticSearchUrlKey)} is not configured in appsettings.json");
+
+        }
+
+        if (!isServiceNameConfigured)
+        {
+            Log.Logger.Error($"{nameof(ServiceNameKey)} is not configured in appsettings.json");
+        }
         return hostBuilder;
+    }
+    private static ElasticsearchSinkOptions CreateElasticsearchSinkOptions(string elasticserchUrl, string serviceName)
+    {
+        return new ElasticsearchSinkOptions(new Uri(elasticserchUrl))
+        {
+
+            AutoRegisterTemplate = true,
+            AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
+            IndexFormat = $"{serviceName!.ToLower()}-{DateTime.UtcNow:yyyy.MM}",
+            CustomFormatter = new ElasticsearchJsonFormatter(renderMessage: true, inlineFields: true)
+        };
     }
 }
 

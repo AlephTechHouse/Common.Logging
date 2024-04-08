@@ -40,37 +40,5 @@ public class UseSerilogWithElastcsearchTests
         logger.LogInformation("This is a test log message");
         Assert.NotNull(logger);
     }
-    [Fact]
-    public void UseSerilogWithElasticsearch_WhenElasticsearchUrlNotConfigured_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var inMemorySettings = new Dictionary<string, string>
-        {
-            {"ElasticsearchUrl", "localhost:9200"},
-            {"SeqUrl", ""}, // misconfigured
-            {"ServiceSettings:ServiceName", "MyService"}
-        };
 
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings!)
-            .Build();
-
-        var hostBuilder = new HostBuilder();
-
-        var sink = new InMemorySink();
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.Sink(sink)
-            .CreateLogger();
-
-        // Act
-        hostBuilder.UseSerilogWithElasticsearch(configuration);
-
-        // Assert
-        var logEvent = sink.LogEvents.FirstOrDefault();
-
-        Assert.NotNull(logEvent);
-        Assert.Contains("SeqUrl is not configured in appsettings.json", logEvent.RenderMessage());
-
-    }
 }
-

@@ -28,6 +28,8 @@ public static class Extensions
 
         hostBuilder.UseSerilog((hostingContext, loggerConfiguration) =>
         {
+            string? environmentName = configuration["ASPNETCORE_ENVIRONMENT"];
+
             loggerConfiguration
                 .ReadFrom.Configuration(configuration)
                 .Enrich.FromLogContext()
@@ -49,7 +51,7 @@ public static class Extensions
             if (isElasticsearchUrlConfigured && isServiceNameConfigured)
 
             {
-                loggerConfiguration.WriteTo.Elasticsearch(CreateElasticsearchSinkOptions(elasticserchUrl!, serviceName!));
+                loggerConfiguration.WriteTo.Elasticsearch(CreateElasticsearchSinkOptions(elasticserchUrl!, serviceName!, environmentName!));
             }
         });
 
@@ -75,14 +77,13 @@ public static class Extensions
 
         return hostBuilder;
     }
-    private static ElasticsearchSinkOptions CreateElasticsearchSinkOptions(string elasticserchUrl, string serviceName)
+    private static ElasticsearchSinkOptions CreateElasticsearchSinkOptions(string elasticserchUrl, string serviceName, string environmentName)
     {
         return new ElasticsearchSinkOptions(new Uri(elasticserchUrl))
         {
 
             AutoRegisterTemplate = true,
-            AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
-            IndexFormat = $"{serviceName!.ToLower()}-{DateTime.UtcNow:yyyy.MM}",
+            IndexFormat = $"{serviceName!.ToLower()}--logs-{environmentName?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy.MM}",
             CustomFormatter = new ElasticsearchJsonFormatter(renderMessage: true, inlineFields: true)
         };
     }

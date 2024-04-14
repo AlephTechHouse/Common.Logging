@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_PATH: 'src/Common.Logging'
-      PROJECT_NAME: 'Common.Logging'
-      PROJECT_PATH_TESTS: 'src/Common.Logging.Tests'
-      PROJECT_NAME_TESTS: 'Common.Logging.Tests'
+      PROJECT_PATH: 'src/ZephyrRelations.Logging'
+      PROJECT_NAME: 'ZephyrRelations.Logging'
+      PROJECT_PATH_TESTS: 'src/ZephyrRelations.Logging.Tests'
+      PROJECT_NAME_TESTS: 'ZephyrRelations.Logging.Tests'
 
     steps:
       - name: Checkout

@@ -1,17 +1,17 @@
-﻿using Common.Logging.Serilog;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ZephyrRelations.Logging.Extensions;
 using Serilog;
 using Serilog.Sinks.InMemory;
 
-namespace Common.Logging.Test;
+namespace ZephyrRelations.Logging.Test;
 
-public class UseSerilogWithElastcsearchTests
+public class ConfigureZephyrRelationsLoggingTest
 {
     [Fact]
-    public void UseSerilogWithElasticsearch_WhenCalled_ConfiguresLoggerCorrectly()
+    public void ConfigureZephyrRelationsLogging_WhenCalled_ConfiguresLoggerCorrectly()
     {
         // Arrange
         var inMemorySettings = new Dictionary<string, string>
@@ -28,11 +28,11 @@ public class UseSerilogWithElastcsearchTests
         var hostBuilder = Host.CreateDefaultBuilder();
 
         // Act
-        hostBuilder.UseSerilogWithElasticsearch(configuration);
+        hostBuilder.ConfigureZephyrRelationsLogging(configuration);
         var host = hostBuilder.Build();
 
         // Assert
-        var logger = host.Services.GetService<ILogger<UseSerilogWithElastcsearchTests>>();
+        var logger = host.Services.GetService<ILogger<ConfigureZephyrRelationsLoggingTest>>();
         if (logger is null)
         {
             throw new ArgumentNullException("Logger is null");

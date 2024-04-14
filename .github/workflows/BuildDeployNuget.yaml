@@ -12,7 +12,9 @@ jobs:
 
     env:
       PROJECT_PATH: 'src/Common.Logging'
+      PROJECT_NAME: 'Common.Logging'
       PROJECT_PATH_TESTS: 'src/Common.Logging.Tests'
+      PROJECT_NAME_TESTS: 'Common.Logging.Tests'
 
     steps:
       - name: Checkout
@@ -26,19 +28,22 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore ${{ env.PROJECT_PATH }}/Common.Logging.csproj
+        run: dotnet restore ${{ env.PROJECT_PATH }}/${{ env.PROJECT_NAME }}.csproj
 
       - name: Build
         run: >
-          dotnet build ${{ env.PROJECT_PATH }}/Common.Logging.csproj
+          dotnet build ${{ env.PROJECT_PATH }}/${{ env.PROJECT_NAME }}.csproj
           --configuration Release
           --no-restore
 
       - name: Restore Test dependencies
-        run: dotnet restore ${{ env.PROJECT_PATH_TESTS }}/Common.Logging.Tests.csproj
+        run: dotnet restore ${{ env.PROJECT_PATH_TESTS }}/${{ env.PROJECT_NAME_TESTS }}.csproj
 
       - name: Test
-        run: dotnet test ${{ env.PROJECT_PATH_TESTS }}/Common.Logging.Tests.csproj
+        run: >
+          dotnet test ${{ env.PROJECT_PATH_TESTS }}/${{ env.PROJECT_NAME_TESTS }}.csproj
+          --filter FullyQualifiedName!~Common.Logging.ElasticsearchLoggingTests
+          --notrait "SkipOnCI=true"
 
       - name: Pack
         run: >

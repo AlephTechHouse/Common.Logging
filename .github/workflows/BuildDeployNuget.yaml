@@ -42,12 +42,12 @@ jobs:
       - name: Test
         run: >
           dotnet test ${{ env.PROJECT_PATH_TESTS }}/${{ env.PROJECT_NAME_TESTS }}.csproj
-          --filter FullyQualifiedName!~Common.Logging.ElasticsearchLoggingTests
+          --filter FullyQualifiedName!~ZephyrRelations.Logging.Tests.ElasticsearchLoggingTests
           --notrait "SkipOnCI=true"
 
       - name: Pack
         run: >
-          dotnet pack ${{ env.PROJECT_PATH }}/Common.Logging.csproj
+          dotnet pack ${{ env.PROJECT_PATH }}/${{ env.PROJECT_NAME }}.csproj
           --configuration Release
           --no-build
           --include-symbols

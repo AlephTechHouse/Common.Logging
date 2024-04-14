@@ -29,14 +29,26 @@ public static class Extensions
         try
         {
             services.AddOpenTelemetry()
-                .ConfigureResource(builder => builder.AddService(ServiceName))
-                .WithTracing(builder => builder
-                    .AddConsoleExporter()
-                    .AddAspNetCoreInstrumentation()
-                    .AddOtlpExporter(otlpOptions =>
+                //.ConfigureResource(builder => builder.AddService(ServiceName))
+                .WithTracing(builder =>
+                {
+                    builder.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(ServiceName))
+                        .AddSource(ServiceName)
+                        //.SetSampler(new AlwaysOnSampler())
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                    .AddOtlpExporter(opts =>
                     {
-                        otlpOptions.Endpoint = new Uri(JaegerUrlKey);
-                    })
+                        opts.Endpoint = new Uri(JaegerUrlKey);
+                    });
+
+                }
+                // .AddConsoleExporter()
+                // .AddAspNetCoreInstrumentation()
+                // .AddOtlpExporter(otlpOptions =>
+                // {
+                //     otlpOptions.Endpoint = new Uri(JaegerUrlKey);
+                // })
                 )
                 .WithMetrics(builder => builder
                     .AddConsoleExporter()

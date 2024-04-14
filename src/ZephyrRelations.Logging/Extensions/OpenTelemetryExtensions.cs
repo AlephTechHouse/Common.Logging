@@ -13,11 +13,12 @@ public static class Extensions
     private const string JaegerUrlKey = "Jaeger:Url";
     private const string JaegerPortKey = "Jaeger:Port";
     private const string PrometheusEndpointPathKey = "Prometheus:EndpointPath";
+    private const string ServiceName = "ServiceSettings:ServiceName";
 
     public static IServiceCollection UseOpenTelemetry(
         this IServiceCollection services,
-        IConfiguration configuration,
-        string serviceName)
+        IConfiguration configuration
+    )
     {
         var configErrorLogger = new LoggerConfiguration()
             .WriteTo.Console()
@@ -28,7 +29,7 @@ public static class Extensions
         try
         {
             services.AddOpenTelemetry()
-                .ConfigureResource(builder => builder.AddService(serviceName))
+                .ConfigureResource(builder => builder.AddService(ServiceName))
                 .WithTracing(builder => builder
                     .AddConsoleExporter()
                     .AddAspNetCoreInstrumentation()
@@ -57,6 +58,13 @@ public static class Extensions
 
     private static void ValidateConfiguration(IConfiguration configuration, ILogger configErrorLogger)
     {
+        if (string.IsNullOrWhiteSpace(configuration[ServiceName]))
+        {
+            string errorMessage = $"{ServiceName} is not configured in appsettings.json";
+            configErrorLogger.Error(errorMessage);
+            throw new InvalidOperationException(errorMessage);
+        }
+
         if (string.IsNullOrWhiteSpace(configuration[JaegerUrlKey]))
         {
             string errorMessage = $"{JaegerUrlKey} is not configured in appsettings.json";

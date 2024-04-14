@@ -18,12 +18,13 @@ public class ZephyrRelationsOpenTelemetryTest
             {
                 { "Jaeger:Url", "http://localhost" },
                 { "Jaeger:Port", "1234" },
-                { "Prometheus:EndpointPath", "/metrics" }
+                { "Prometheus:EndpointPath", "/metrics" },
+                { "ServiceSettings:ServiceName", "TestService"}
             })
             .Build();
 
         // Act
-        services.UseOpenTelemetry(configuration, "TestService");
+        services.UseOpenTelemetry(configuration);
 
         // Assert
         Assert.Contains(services, service => service.ServiceType == typeof(TracerProvider));

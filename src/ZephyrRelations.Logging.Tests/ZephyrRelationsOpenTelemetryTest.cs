@@ -16,7 +16,7 @@ public class ZephyrRelationsOpenTelemetryTest
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "Jaeger:Url", "http://localhost" },
+                { "Jaeger:Url", "http://localhost:14250" },
                 { "Jaeger:Port", "1234" },
                 { "Prometheus:EndpointPath", "/metrics" },
                 { "ServiceSettings:ServiceName", "TestService"}
